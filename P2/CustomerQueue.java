@@ -29,9 +29,9 @@ public class CustomerQueue
     {
     	if (queue.size() < queueLength) 
     	{ 
-    		queue.add(lastCustomer);
     		gui.fillLoungeChair(firstAvailableSeat, lastCustomer);
     		gui.println("Customer: " + lastCustomer.getCustomerID() + " sits in seat: " + firstAvailableSeat);
+    		queue.add(lastCustomer);
     		if (firstAvailableSeat < 17) { firstAvailableSeat++; }
     		else { firstAvailableSeat = 0; }
     	}
@@ -48,7 +48,9 @@ public class CustomerQueue
     		else { firstInLine = 0; }
     		return firstCustomer;
     	}
-    	else gui.println("Queue is empty!");
+    	// This caused mass messaging if there barber didn't have an additional sleep at the end of run.
+    	
+    	// else gui.println("Queue is empty!");
     	return null;
     }
     

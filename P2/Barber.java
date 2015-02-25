@@ -51,9 +51,10 @@ public class Barber implements Runnable, Constants
 			{
 				gui.barberIsAwake(pos);
 				gui.fillBarberChair(pos, firstCustomer);
+				gui.println("Customer: " + firstCustomer.getCustomerID() + " is served by barber: " + pos);
 				try
 				{
-					Thread.sleep(MIN_BARBER_WORK+(int)(Math.random()*(MAX_BARBER_WORK-MIN_BARBER_WORK+1)));
+					Thread.sleep(MIN_BARBER_WORK+(int)(Math.random()*(Globals.barberWork-MIN_BARBER_WORK+1)));
 				}
 				catch (InterruptedException e)
 				{
@@ -63,21 +64,24 @@ public class Barber implements Runnable, Constants
 				try
 				{
 					gui.barberIsSleeping(pos);
-					Thread.sleep(MIN_BARBER_SLEEP+(int)(Math.random()*(MAX_BARBER_SLEEP-MIN_BARBER_SLEEP+1)));
+					Thread.sleep(MIN_BARBER_SLEEP+(int)(Math.random()*(Globals.barberSleep-MIN_BARBER_SLEEP+1)));
 				}
 				catch (InterruptedException e)
 				{
 					e.printStackTrace();
 				}
 			}
-			try
-			{
-				Thread.sleep(3000);
-			}
-			catch (InterruptedException e)
-			{
-				e.printStackTrace();
-			}
+			// This additional sleep was implemented to hinder messages from flooding the TextArea. 
+			// Those messages was commented out.
+			
+			//try
+			//{
+			//	Thread.sleep(3000);
+			//}
+			//catch (InterruptedException e)
+			//{
+			//	e.printStackTrace();
+			//}
 		}
 	}
 	// Add more methods as needed
