@@ -10,13 +10,13 @@ import java.util.*;
 public class EventQueue
 {
 	/** The list of events */
-	private ArrayList events;
+	private ArrayList<Event> events;
 
 	/**
 	 * Creates a new Event Queue.
 	 */
 	public EventQueue() {
-		events = new ArrayList();
+		events = new ArrayList<Event>();
 	}
 
 	/**

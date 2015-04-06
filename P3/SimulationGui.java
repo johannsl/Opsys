@@ -8,6 +8,10 @@ import javax.swing.*;
  */
 public class SimulationGui extends JFrame implements Constants, ActionListener, Runnable, Gui
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	/** Queue components shown in the GUI */
 	private Queue memoryQueue, cpuQueue, ioQueue;
 	/** Resources components shown in the GUI */

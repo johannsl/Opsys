@@ -1,5 +1,7 @@
 import java.util.*;
+
 import javax.swing.*;
+
 import java.awt.*;
 
 /**
@@ -8,8 +10,12 @@ import java.awt.*;
  * that updates to the queue will be automatically displayed in the GUI.
  */
 public class Queue extends JPanel implements Constants {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	/** The content of the queue */
-	private ArrayList content;
+	private ArrayList<Object> content;
 	/** The name of the queue */
 	private String name;
 	/** The maximum number of elements of the queue that will be visible in the GUI */
@@ -29,7 +35,7 @@ public class Queue extends JPanel implements Constants {
 		this.name = name;
 		this.maxVisibleLength = maxVisibleLength;
 		this.direction = direction;
-		content = new ArrayList();
+		content = new ArrayList<Object>();
 		setBackground(Color.white);
 	}
 

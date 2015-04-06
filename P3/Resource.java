@@ -1,5 +1,7 @@
 import java.util.*;
+
 import javax.swing.*;
+
 import java.awt.*;
 
 /** 
@@ -7,7 +9,12 @@ import java.awt.*;
  * represent a CPU, memory, etc, and is displayed as a circle with a name. The resource
  * may also contain an active process.
  */
+@SuppressWarnings("unused")
 public class Resource extends JPanel {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	/** The name of the resource */
 	private String name;
 	/** The process that is currently using the resource */
