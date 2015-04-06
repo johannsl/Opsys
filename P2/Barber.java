@@ -46,7 +46,7 @@ public class Barber implements Runnable, Constants
 	{
 		while(flag)
 		{
-			Customer firstCustomer = queue.removeCustomer();
+			Customer firstCustomer = queue.removeCustomer(this, pos);
 			if (firstCustomer != null)
 			{
 				gui.barberIsAwake(pos);

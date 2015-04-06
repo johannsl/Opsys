@@ -44,7 +44,7 @@ public class Doorman implements Runnable, Constants
 		while(flag)
 		{
 			Customer lastCustomer = new Customer();
-			queue.addCustomer(lastCustomer);
+			queue.addCustomer(lastCustomer, this);
 			try
 			{
 				Thread.sleep(MIN_DOORMAN_SLEEP+(int)(Math.random()*(Globals.doormanSleep-MIN_DOORMAN_SLEEP+1)));
