@@ -55,5 +55,4 @@ public class Doorman implements Runnable, Constants
 			}
 		}
 	}
-	// Add more methods as needed
 }

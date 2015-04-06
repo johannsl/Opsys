@@ -5,6 +5,7 @@ import javax.swing.*;
  * This class implements a customer's part of the Barbershop example.
  * This is a passive class just holding data.
  */
+@SuppressWarnings("unused")
 public class Customer implements Constants {
 	/** The ID of the next customer to be created */
 	public static int nextID = 0;

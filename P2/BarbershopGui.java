@@ -1,5 +1,6 @@
 import java.awt.*;
 import java.awt.event.*;
+
 import javax.swing.*;
 import javax.swing.event.*;
 
@@ -9,6 +10,10 @@ import javax.swing.event.*;
  * available to be used by the Doorman, Barber and CustomerQueue classes.
  */
 public class BarbershopGui extends JFrame implements Constants, Gui, ChangeListener {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	/** Various images used by the GUI */
 	public static Image tableImage;
 	public static Image deskImage;
@@ -38,6 +43,7 @@ public class BarbershopGui extends JFrame implements Constants, Gui, ChangeListe
 	 * Creates a new GUI.
 	 * @param title	The tile of the GUI window.
 	 */
+	@SuppressWarnings("deprecation")
 	public BarbershopGui(String title) {
 		super(title);
 		loadImages();

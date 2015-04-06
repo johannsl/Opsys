@@ -71,19 +71,7 @@ public class Barber implements Runnable, Constants
 					e.printStackTrace();
 				}
 			}
-			// This additional sleep was implemented to hinder messages from flooding the TextArea. 
-			// Those messages was commented out.
-			
-			//try
-			//{
-			//	Thread.sleep(3000);
-			//}
-			//catch (InterruptedException e)
-			//{
-			//	e.printStackTrace();
-			//}
 		}
 	}
-	// Add more methods as needed
 }
 

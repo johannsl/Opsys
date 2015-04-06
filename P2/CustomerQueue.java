@@ -4,6 +4,7 @@ import java.util.Objects;
 /**
  * This class implements a queue of customers as a circular buffer.
  */
+@SuppressWarnings("unused")
 public class CustomerQueue 
 {	
 	Gui gui;
@@ -26,51 +27,57 @@ public class CustomerQueue
 		firstAvailableSeat = 0;
 	}
     
-    public void addCustomer(Customer lastCustomer, Doorman doorman)
+    public synchronized void addCustomer(Customer lastCustomer, Doorman doorman)
     {
-    	if (queue.size() < queueLength) 
-    	{ 
-    		gui.fillLoungeChair(firstAvailableSeat, lastCustomer);
-    		gui.println("Customer: " + lastCustomer.getCustomerID() + " sits in seat: " + firstAvailableSeat);
-    		queue.add(lastCustomer);
-    		if (firstAvailableSeat < 17) firstAvailableSeat++;
-    		else firstAvailableSeat = 0;
-    	}
-    	else gui.println("Queue is full!");
-    	try
+    	while (queue.size() >= queueLength) 
     	{
-            doorman.wait();
-            gui.println("Doorman is waiting...");
-        }
-    	catch(InterruptedException e){
-            e.printStackTrace();
-        }
+    		gui.println("Queue is full!");
+    		try
+        	{
+                gui.println("Doorman is waiting...");
+    			wait();
+        	}
+        	catch(InterruptedException e)
+        	{
+                e.printStackTrace();
+        	}
+    	}
+    	gui.fillLoungeChair(firstAvailableSeat, lastCustomer);
+		gui.println("Customer: " + lastCustomer.getCustomerID() + " sits in seat: " + firstAvailableSeat);
+		queue.add(lastCustomer);
+		if (firstAvailableSeat < 17) firstAvailableSeat++;
+		else firstAvailableSeat = 0;
+		if (queue.size() == 1) 
+		{
+			gui.println("Barbers are notified.");
+			notifyAll();
+		}
     }
     
     public synchronized Customer removeCustomer(Barber barber, int pos)
     {
-    	if (queue.size() > 0)
+    	while (queue.size() <= 0)
     	{
-    		Customer firstCustomer = queue.remove(0);
-    		gui.emptyLoungeChair(firstInLine);
-    		if (firstInLine < 17) firstInLine++;
-    		else firstInLine = 0;
-    		return firstCustomer;
+    		gui.println("Queue is empty!");
+    		try
+    		{
+    			gui.println("Barber: " + pos + " is waiting...");
+    			wait();
+    		}
+    		catch(InterruptedException e)
+    		{
+    			e.printStackTrace();
+    		}
     	}
-    	try
-    	{
-    		barber.wait();
-    		gui.println("Barber: " + pos + " is waiting...");
-        }
-    	catch(InterruptedException e)
-    	{
-    		e.printStackTrace();
-        }
-    	// This caused mass messaging if there barber didn't have an additional sleep at the end of run.
-    	
-    	// else gui.println("Queue is empty!");
-    	return null;
+    	Customer firstCustomer = queue.remove(0);
+		gui.emptyLoungeChair(firstInLine);
+		if (firstInLine < 17) firstInLine++;
+		else firstInLine = 0;
+		if (queue.size() == queueLength-1)
+		{
+			gui.println("Doorman is notified.");
+			notifyAll();
+		}
+		return firstCustomer;
     }
-    
-	// Add more methods as needed
 }

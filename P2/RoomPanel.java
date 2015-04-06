@@ -5,6 +5,10 @@ import javax.swing.*;
  * Component used by the GUI to display the Barbershop salon.
  */
 public class RoomPanel extends JPanel implements Constants {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	/** The waiting lounge chairs */
 	private PicturePanel chairs[];
 	/** The barbers' chairs */

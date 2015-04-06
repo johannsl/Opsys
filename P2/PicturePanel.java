@@ -6,6 +6,10 @@ import javax.swing.*;
  * and four possible orientations.
  */
 public class PicturePanel extends JPanel implements Constants {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	/** The image being displayed by this component */
 	private Image image;
 	/** An optional image being displayed on top of the other image */
