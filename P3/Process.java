@@ -1,6 +1,8 @@
 import java.awt.*;
 import java.util.*;
 
+import sun.font.LayoutPathImpl.EndType;
+
 /**
  * This class contains data associated with processes,
  * and methods for manipulating this data as well as
@@ -45,6 +47,9 @@ public class Process implements Constants
 
 	/** The global time of the last event involving this process */
 	private long timeOfLastEvent;
+	
+	private Random mRandom;
+	private long endTime;
 
 	/**
 	 * Creates a new process with given parameters. Other parameters are randomly
@@ -53,6 +58,7 @@ public class Process implements Constants
 	 * @param creationTime	The global time when this process is created.
 	 */
 	public Process(long memorySize, long creationTime) {
+		mRandom = new Random();
 		// Memory need varies from 100 kB to 25% of memory size
 		memoryNeeded = 100 + (long)(Math.random()*(memorySize/4-100));
 		// CPU time needed varies from 100 to 10000 milliseconds
@@ -116,6 +122,125 @@ public class Process implements Constants
 		statistics.totalTimeSpentWaitingForMemory += timeSpentWaitingForMemory;
 		statistics.nofCompletedProcesses++;
 	}
-
+	
 	// Add more methods as needed
+
+	public synchronized void leaveCPU(long clock) {
+		timeSpentInCpu += clock - timeOfLastEvent;
+		cpuTimeNeeded -= clock - timeOfLastEvent;
+		timeToNextIoOperation -= clock - timeOfLastEvent;
+		endTime = clock;
+		timeOfLastEvent = clock;
+		notifyAll();
+	}
+	
+	public synchronized void enterCPU(long clock) {
+		timeSpentInReadyQueue += clock - timeOfLastEvent;
+		timeOfLastEvent = clock;
+		notifyAll();
+	}
+
+	public synchronized void enterIO(long clock) {
+		timeSpentWaitingForIo += clock - timeOfLastEvent;
+		timeOfLastEvent = clock;
+		notifyAll();
+	}
+	
+	public synchronized void leaveIO(long clock) {
+		timeSpentInIo += clock - timeOfLastEvent;
+		timeToNextIoOperation = calcTimeToNextIoOperation();
+		timeOfLastEvent = clock;
+		notifyAll();
+	}
+	
+	public synchronized void enterIOQueue(long clock) {
+		nofTimesInIoQueue++;
+		timeSpentInReadyQueue += clock - timeOfLastEvent;
+		timeOfLastEvent = clock;
+		notifyAll();
+	}
+	
+	public synchronized void enterCPUQueue(long clock) {
+		nofTimesInReadyQueue++;
+		timeOfLastEvent = clock;
+		notifyAll();
+	}
+	
+	public long calcTimeToNextIoOperation() {
+		long result = timeToNextIoOperation;
+		if (timeToNextIoOperation == 0) result = (long) (mRandom.nextDouble() * avgIoInterval * avgIoInterval * 2.);
+		return result;
+	}
+	
+	// Generated getters and setters. Probably more than needed...
+
+	public long getCpuTimeNeeded() {
+		return cpuTimeNeeded;
+	}
+
+	public void setCpuTimeNeeded(long cpuTimeNeeded) {
+		this.cpuTimeNeeded = cpuTimeNeeded;
+	}
+
+	public long getTimeToNextIoOperation() {
+		return timeToNextIoOperation;
+	}
+
+	public void setTimeToNextIoOperation(long timeToNextIoOperation) {
+		this.timeToNextIoOperation = timeToNextIoOperation;
+	}
+
+	public long getTimeSpentWaitingForMemory() {
+		return timeSpentWaitingForMemory;
+	}
+
+	public void setTimeSpentWaitingForMemory(long timeSpentWaitingForMemory) {
+		this.timeSpentWaitingForMemory = timeSpentWaitingForMemory;
+	}
+
+	public long getTimeSpentInReadyQueue() {
+		return timeSpentInReadyQueue;
+	}
+
+	public void setTimeSpentInReadyQueue(long timeSpentInReadyQueue) {
+		this.timeSpentInReadyQueue = timeSpentInReadyQueue;
+	}
+
+	public long getTimeSpentInCpu() {
+		return timeSpentInCpu;
+	}
+
+	public void setTimeSpentInCpu(long timeSpentInCpu) {
+		this.timeSpentInCpu = timeSpentInCpu;
+	}
+
+	public long getTimeSpentWaitingForIo() {
+		return timeSpentWaitingForIo;
+	}
+
+	public void setTimeSpentWaitingForIo(long timeSpentWaitingForIo) {
+		this.timeSpentWaitingForIo = timeSpentWaitingForIo;
+	}
+
+	public long getTimeSpentInIo() {
+		return timeSpentInIo;
+	}
+
+	public void setTimeSpentInIo(long timeSpentInIo) {
+		this.timeSpentInIo = timeSpentInIo;
+	}
+
+	public long getTimeOfLastEvent() {
+		return timeOfLastEvent;
+	}
+
+	public void setTimeOfLastEvent(long timeOfLastEvent) {
+		this.timeOfLastEvent = timeOfLastEvent;
+	}
+
+	public void setMemoryNeeded(long memoryNeeded) {
+		this.memoryNeeded = memoryNeeded;
+	}
+
+	
 }
