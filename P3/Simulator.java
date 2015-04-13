@@ -46,8 +46,8 @@ public class Simulator implements Constants
 		memory = new Memory(memoryQueue, memorySize, statistics);
 		clock = 0;
 		// Add code as needed
-		mCPU = new CPU(cpuQueue);
-		mIO = new IO(ioQueue);
+		mCPU = new CPU(cpuQueue, maxCpuTime);
+		mIO = new IO(ioQueue, avgIoTime);
     }
 
     /**
@@ -157,14 +157,33 @@ public class Simulator implements Constants
 	 * Simulates a process switch.
 	 */
 	private void switchProcess() {
-		// Incomplete
+		Process process = mCPU.getActive();
+		if (process != null) {
+			process.leaveCPU(clock);
+			mCPU.insertProcess(process);
+			process.enterCPUQueue(clock);
+		}
+		
+		process = mCPU.start();
+		if (process != null) {
+			process.enterCPU(clock);
+			if (process.calcTimeToNextIoOperation() > mCPU.getMaxCPUTime() && process.getCpuTimeNeeded() > mCPU.getMaxCPUTime()) {
+				eventQueue.insertEvent(new Event(SWITCH_PROCESS, clock + mCPU.getMaxCPUTime()));
+			} else if (process.calcTimeToNextIoOperation() > process.getCpuTimeNeeded()) {
+				eventQueue.insertEvent(new Event(END_PROCESS, clock + process.getCpuTimeNeeded()));
+			} else {
+				eventQueue.insertEvent(new Event(IO_REQUEST, clock + process.calcTimeToNextIoOperation()));
+			}
+		}
 	}
 
 	/**
 	 * Ends the active process, and deallocates any resources allocated to it.
 	 */
 	private void endProcess() {
-		// Incomplete
+		Process process = mCPU.getActive();
+		process.leaveCPU(clock);
+		memory.processCompleted(process);
 	}
 
 	/**
@@ -173,6 +192,16 @@ public class Simulator implements Constants
 	 */
 	private void processIoRequest() {
 		// Incomplete
+		Process process = mCPU.getActive();
+		if (process != null) {
+			process.leaveCPU(clock);
+			process.enterIOQueue(clock);
+			if (mIO.insertProcess(process)) {
+				process.enterIO(clock);
+				eventQueue.insertEvent(new Event(END_IO, clock + mIO.getIOTime()));
+			}
+			switchProcess();
+		}
 	}
 
 	/**
@@ -180,7 +209,16 @@ public class Simulator implements Constants
 	 * is done with its I/O operation.
 	 */
 	private void endIoOperation() {
-		// Incomplete
+		Process process = mIO.getProcess();
+		process.leaveIO(clock);
+		mCPU.insertProcess(process);
+		process.enterCPUQueue(clock);
+		if (mCPU.isIdle()) switchProcess();
+		process = mIO.begin();
+		if (process != null) {
+			process.enterIO(clock);
+			eventQueue.insertEvent(new Event(END_IO, clock + mIO.getIOTime()));
+		}
 	}
 
 	/**
