@@ -125,6 +125,24 @@ public class Process implements Constants
 	
 	// Add more methods as needed
 
+	public synchronized void enterCPUQueue(long clock) {
+		//TEST PRINT
+		System.out.print("Process enters CPU queue at " + clock + "\n");
+	
+		nofTimesInReadyQueue++;
+		timeOfLastEvent = clock;
+		notifyAll();
+	}
+	
+	public synchronized void enterCPU(long clock) {
+		//TEST PRINT
+		System.out.print("Process enters CPU at " + clock + "\n");
+	
+		timeSpentInReadyQueue += clock - timeOfLastEvent;
+		timeOfLastEvent = clock;
+		notifyAll();
+	}
+	
 	public synchronized void leaveCPU(long clock) {
 		timeSpentInCpu += clock - timeOfLastEvent;
 		cpuTimeNeeded -= clock - timeOfLastEvent;
@@ -133,8 +151,8 @@ public class Process implements Constants
 		timeOfLastEvent = clock;
 		notifyAll();
 	}
-	
-	public synchronized void enterCPU(long clock) {
+	public synchronized void enterIOQueue(long clock) {
+		nofTimesInIoQueue++;
 		timeSpentInReadyQueue += clock - timeOfLastEvent;
 		timeOfLastEvent = clock;
 		notifyAll();
@@ -152,19 +170,7 @@ public class Process implements Constants
 		timeOfLastEvent = clock;
 		notifyAll();
 	}
-	
-	public synchronized void enterIOQueue(long clock) {
-		nofTimesInIoQueue++;
-		timeSpentInReadyQueue += clock - timeOfLastEvent;
-		timeOfLastEvent = clock;
-		notifyAll();
-	}
-	
-	public synchronized void enterCPUQueue(long clock) {
-		nofTimesInReadyQueue++;
-		timeOfLastEvent = clock;
-		notifyAll();
-	}
+
 	
 	public long calcTimeToNextIoOperation() {
 		long result = timeToNextIoOperation;
@@ -241,6 +247,5 @@ public class Process implements Constants
 	public void setMemoryNeeded(long memoryNeeded) {
 		this.memoryNeeded = memoryNeeded;
 	}
-
 	
 }

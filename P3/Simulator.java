@@ -58,7 +58,7 @@ public class Simulator implements Constants
 	public void simulate() {
 		// TODO: You may want to extend this method somewhat.
 
-		System.out.print("Simulating...");
+		System.out.print("Simulating... \n");
 		// Genererate the first process arrival event
 		eventQueue.insertEvent(new Event(NEW_PROCESS, 0));
 		// Process events until the simulation length is exceeded:
@@ -76,11 +76,15 @@ public class Simulator implements Constants
 			if (clock < simulationLength) {
 				processEvent(event);
 			}
-
 			// Note that the processing of most events should lead to new
 			// events being added to the event queue!
-
 		}
+		
+		// TEST PRINT
+		if (clock >= simulationLength) {
+			System.out.println("Time has run out! \n");
+		}
+		
 		System.out.println("..done.");
 		// End the simulation by printing out the required statistics
 		statistics.printReport(simulationLength);
@@ -118,6 +122,10 @@ public class Simulator implements Constants
 		// Create a new process
 		Process newProcess = new Process(memory.getMemorySize(), clock);
 		memory.insertProcess(newProcess);
+		
+		//TEST PRINT
+		System.out.print(newProcess.toString() + ": CPU TIME: " + newProcess.getCpuTimeNeeded() + ", MEMORY NEED: " + newProcess.getMemoryNeeded() + "\n");
+		
 		flushMemoryQueue();
 		// Add an event for the next process arrival
 		long nextArrivalTime = clock + 1 + (long)(2*Math.random()*avgArrivalInterval);
@@ -134,15 +142,20 @@ public class Simulator implements Constants
 		Process p = memory.checkMemory(clock);
 		// As long as there is enough memory, processes are moved from the memory queue to the cpu queue
 		while(p != null) {
-
-			mCPU.insertProcess(p);
-
 			// TODO: Add this process to the CPU queue!
 			// Also add new events to the event queue if needed
-			eventQueue.insertEvent(new Event(SOUTH, 0));
+			
+			//TEST PRINT
+			System.out.print("INSERTING: " + p.toString() + " to the CPU QUEUE \n");
+			
+			if (mCPU.insertProcess(p, clock)) {
+				gui.setCpuActive(p);
+			}
+			
+//			eventQueue.insertEvent(new Event(SWITCH_PROCESS, clock));
 			// Since we haven't implemented the CPU and I/O device yet,
 			// we let the process leave the system immediately, for now.
-			memory.processCompleted(p);
+//			memory.processCompleted(p);
 			// Try to use the freed memory:
 			flushMemoryQueue();
 			// Update statistics
@@ -160,7 +173,7 @@ public class Simulator implements Constants
 		Process process = mCPU.getActive();
 		if (process != null) {
 			process.leaveCPU(clock);
-			mCPU.insertProcess(process);
+//			mCPU.insertProcess(process);
 			process.enterCPUQueue(clock);
 		}
 		
@@ -211,7 +224,7 @@ public class Simulator implements Constants
 	private void endIoOperation() {
 		Process process = mIO.getProcess();
 		process.leaveIO(clock);
-		mCPU.insertProcess(process);
+//		mCPU.insertProcess(process);
 		process.enterCPUQueue(clock);
 		if (mCPU.isIdle()) switchProcess();
 		process = mIO.begin();
@@ -243,7 +256,7 @@ public class Simulator implements Constants
 	 * @param args	Parameters from the command line, they are ignored.
 	 */
 	public static void main(String args[]) {
-		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+//		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 //		System.out.println("Please input system parameters: ");
 //		System.out.print("Memory size (KB): ");
 //		long memorySize = readLong(reader);

@@ -6,6 +6,11 @@ public class CPU {
     private Process mProcess;
     private long maxCPUTime;
 
+	public CPU(Queue queue, long maxCPUTime) {
+        this.mQueue = queue;
+        this.maxCPUTime = maxCPUTime;
+    }
+	
     public long getMaxCPUTime() {
 		return maxCPUTime;
 	}
@@ -14,11 +19,19 @@ public class CPU {
 		this.maxCPUTime = maxCPUTime;
 	}
 
-	public CPU(Queue queue, long maxCPUTime) {
-        this.mQueue = queue;
-        this.maxCPUTime = maxCPUTime;
+    public boolean insertProcess(Process process, long clock) {
+        mQueue.insert(process);
+        process.enterCPUQueue(clock);
+        if (mProcess == null) {
+        	mProcess = (Process) mQueue.removeNext();
+        	mProcess.enterCPU(clock);
+        	return true;
+        }
+        return false;
     }
-
+    
+    
+    
     public boolean isIdle() {
     	return mProcess == null;
     }
@@ -28,11 +41,7 @@ public class CPU {
     	mProcess = null;
     	return process;
     }
-    
-    public void insertProcess(Process process) {
-        mQueue.insert(process);
-        if (mProcess == null) mProcess = (Process) mQueue.removeNext();
-    }
+
 
     public Process popProcess() {
         if (mQueue.isEmpty()) return mProcess;
