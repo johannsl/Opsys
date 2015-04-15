@@ -47,7 +47,7 @@ public class Simulator implements Constants
 		clock = 0;
 		// Add code as needed
 		CPU = new CPU(eventQueue, cpuQueue, gui, clock, statistics, maxCpuTime);
-		IO = new IO(ioQueue, clock, gui, statistics, avgIoTime);
+		IO = new IO(eventQueue, ioQueue, gui, clock, statistics, avgIoTime);
     }
 
     /**
@@ -69,7 +69,7 @@ public class Simulator implements Constants
 			long timeDifference = event.getTime()-clock;
 			
 			// TEST PRINT
-			System.out.print("\n" + timeDifference + " has passed since last event \n");
+//			System.out.print("\n" + timeDifference + " has passed since last event \n");
 			
 			// ...and update the clock.	
 			clock = event.getTime();
@@ -80,7 +80,6 @@ public class Simulator implements Constants
 			gui.timePassed(timeDifference);
 			CPU.timePassed(timeDifference);
 			IO.timePassed(timeDifference);
-			
 			// Deal with the event
 			if (clock < simulationLength) {
 				processEvent(event);
@@ -132,7 +131,7 @@ public class Simulator implements Constants
 		Process newProcess = new Process(memory.getMemorySize(), clock);
 		
 		//TEST PRINT
-		System.out.print(newProcess.toString() + ": CPU TIME: " + newProcess.getCpuTimeNeeded() + ", MEMORY NEED: " + newProcess.getMemoryNeeded() + "\n");
+//		System.out.print(newProcess.toString() + ": CPU TIME: " + newProcess.getCpuTimeNeeded() + ", MEMORY NEED: " + newProcess.getMemoryNeeded() + "\n");
 		
 		memory.insertProcess(newProcess);
 		flushMemoryQueue();
@@ -155,21 +154,23 @@ public class Simulator implements Constants
 			// Also add new events to the event queue if needed
 			
 			//TEST PRINT
-			System.out.print("Inserting " + p.toString() + " to the CPU queue \n");
+//			System.out.print("Inserting " + p.toString() + " to the CPU queue \n");
 			
 			CPU.insertProcess(p);
-			if (CPU.isIdle()) {
-				CPU.run();
-			}
+			CPU.run();
 			// Since we haven't implemented the CPU and I/O device yet,
 			// we let the process leave the system immediately, for now.
 			// memory.processCompleted(p);
 			// Try to use the freed memory:
-			flushMemoryQueue();
+//			flushMemoryQueue();
 			// Update statistics
-			p.updateStatistics(statistics);
+			//p.updateStatistics(statistics);
 			// Check for more free memory
 			p = memory.checkMemory(clock);
+			
+			// TEST PRINT
+			System.out.print("Free memory: " + memory.getFreeMemory() + "\n");
+			
 		}
 	}
 
@@ -179,37 +180,23 @@ public class Simulator implements Constants
 	private void switchProcess() {
 		Process p = CPU.extractProcess();
 		CPU.insertProcess(p);
-		if (CPU.isIdle()) {
-			CPU.run();
-		}
-		
-//		Process process = mCPU.getActive();
-//		if (process != null) {
-//			process.leaveCPU(clock);
-//			mCPU.insertProcess(process);
-//			process.enterCPUQueue(clock);
-//		}
-//		
-//		process = mCPU.start();
-//		if (process != null) {
-//			process.enterCPU(clock);
-//			if (process.calcTimeToNextIoOperation() > mCPU.getMaxCPUTime() && process.getCpuTimeNeeded() > mCPU.getMaxCPUTime()) {
-//				eventQueue.insertEvent(new Event(SWITCH_PROCESS, clock + mCPU.getMaxCPUTime()));
-//			} else if (process.calcTimeToNextIoOperation() > process.getCpuTimeNeeded()) {
-//				eventQueue.insertEvent(new Event(END_PROCESS, clock + process.getCpuTimeNeeded()));
-//			} else {
-//				eventQueue.insertEvent(new Event(IO_REQUEST, clock + process.calcTimeToNextIoOperation()));
-//			}
-//		}
+		CPU.run();
+		statistics.processSwitches++;
 	}
 
 	/**
 	 * Ends the active process, and deallocates any resources allocated to it.
 	 */
 	private void endProcess() {
-//		Process process = mCPU.getActive();
-//		process.leaveCPU(clock);
-//		memory.processCompleted(process);
+		Process p = CPU.extractProcess();
+		memory.processCompleted(p);
+		CPU.run();
+		statistics.nofCompletedProcesses++;
+		flushMemoryQueue();
+		
+		// TEST PRINT
+		System.out.print("Free memory: " + memory.getFreeMemory() + "\n");
+		
 	}
 
 	/** 
@@ -217,17 +204,10 @@ public class Simulator implements Constants
 	 * perform an I/O operation.
 	 */
 	private void processIoRequest() {
-//		// Incomplete
-//		Process process = mCPU.getActive();
-//		if (process != null) {
-//			process.leaveCPU(clock);
-//			process.enterIOQueue(clock);
-//			if (mIO.insertProcess(process)) {
-//				process.enterIO(clock);
-//				eventQueue.insertEvent(new Event(END_IO, clock + mIO.getIOTime()));
-//			}
-//			switchProcess();
-//		}
+		Process p = CPU.extractProcess();
+		IO.insertProcess(p);
+		CPU.run();
+		IO.run();
 	}
 
 	/**
@@ -235,16 +215,11 @@ public class Simulator implements Constants
 	 * is done with its I/O operation.
 	 */
 	private void endIoOperation() {
-//		Process process = IO.getProcess();
-//		process.leaveIO(clock);
-//		CPU.insertProcess(process);
-//		process.enterCPUQueue(clock);
-//		if (CPU.isIdle()) switchProcess();
-//		process = IO.begin();
-//		if (process != null) {
-//			process.enterIO(clock);
-//			eventQueue.insertEvent(new Event(END_IO, clock + IO.getIOTime()));
-//		}
+		Process p = IO.extractProcess();
+		CPU.insertProcess(p);
+		IO.run();
+		CPU.run();
+		statistics.ioOperations++;
 	}
 
 	/**

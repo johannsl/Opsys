@@ -47,9 +47,6 @@ public class Process implements Constants
 
 	/** The global time of the last event involving this process */
 	private long timeOfLastEvent;
-	
-	private Random randomVar;
-	private long endTime;
 
 	/**
 	 * Creates a new process with given parameters. Other parameters are randomly
@@ -58,7 +55,6 @@ public class Process implements Constants
 	 * @param creationTime	The global time when this process is created.
 	 */
 	public Process(long memorySize, long creationTime) {
-		randomVar = new Random();
 		// Memory need varies from 100 kB to 25% of memory size
 		memoryNeeded = 100 + (long)(Math.random()*(memorySize/4-100));
 		// CPU time needed varies from 100 to 10000 milliseconds
@@ -126,8 +122,9 @@ public class Process implements Constants
 	// Add more methods as needed
 
 	public synchronized void enterCPUQueue(long clock) {
+		
 		//TEST PRINT
-		System.out.print(this.toString() + " enters CPU queue at " + clock + "\n");
+//		System.out.print(toString() + " enters CPU queue at " + clock + "\n");
 	
 		nofTimesInReadyQueue++;
 		timeOfLastEvent = clock;
@@ -135,8 +132,9 @@ public class Process implements Constants
 	}
 	
 	public synchronized void enterCPU(long clock) {
+		
 		//TEST PRINT
-		System.out.print(this.toString() + " enters CPU at " + clock + "\n");
+//		System.out.print(toString() + " enters CPU at " + clock + "\n");
 	
 		timeSpentInReadyQueue += clock - timeOfLastEvent;
 		timeOfLastEvent = clock;
@@ -144,39 +142,68 @@ public class Process implements Constants
 	}
 	
 	public synchronized void leaveCPU(long clock) {
+		
 		//TEST PRINT
-		System.out.print(this.toString() + " leaves CPU at " + clock + "\n");
+//		System.out.print(toString() + " leaves CPU at " + clock + "\n");
 		
 		timeSpentInCpu += clock - timeOfLastEvent;
 		cpuTimeNeeded -= clock - timeOfLastEvent;
 		timeToNextIoOperation -= clock - timeOfLastEvent;
-		endTime = clock;
 		timeOfLastEvent = clock;
 		notifyAll();
 	}
 	public synchronized void enterIOQueue(long clock) {
+		
+		// TEST PRINT
+//		System.out.print(toString() + " enters IO queue at " + clock + "\n");
+		
 		nofTimesInIoQueue++;
-		timeSpentInReadyQueue += clock - timeOfLastEvent;
 		timeOfLastEvent = clock;
 		notifyAll();
 	}
 
 	public synchronized void enterIO(long clock) {
+		
+		// TEST PRINT
+//		System.out.print(toString() + " enters IO at " + clock + "\n");
+		
 		timeSpentWaitingForIo += clock - timeOfLastEvent;
 		timeOfLastEvent = clock;
 		notifyAll();
 	}
 	
 	public synchronized void leaveIO(long clock) {
+		
+		// TEST PRINT
+//		System.out.print(toString() + " leaves IO at " + clock + "\n");
+		
 		timeSpentInIo += clock - timeOfLastEvent;
-		timeToNextIoOperation = calcTimeToNextIoOperation();
 		timeOfLastEvent = clock;
 		notifyAll();
 	}
 	
 	public long calcTimeToNextIoOperation() {
+		if (timeToNextIoOperation == 0) {
+			long range = (avgIoInterval * 2);
+			Random r = new Random();
+			timeToNextIoOperation = (long)(r.nextDouble()*range);
+		}
 		long result = timeToNextIoOperation;
-		if (timeToNextIoOperation == 0) result = (long) (randomVar.nextDouble() * avgIoInterval * avgIoInterval * 2.);
+
+		// TEST PRINT
+//		System.out.print(toString() + " has " + timeToNextIoOperation + " cycles to next IO operation \n");
+		
+		return result;
+	}
+	
+	public long calcIoOperationTime(long avgIOTime) {
+		long range = (avgIOTime * 2);
+		Random r = new Random();
+		long result = (long)(r.nextDouble()*range);
+		
+		// TEST PRINT
+//		System.out.print(toString() + " has " + result + " cycles to complete the current IO operation \n");
+		
 		return result;
 	}
 	

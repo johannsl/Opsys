@@ -20,15 +20,29 @@ public class CPU {
     }
 	
     public void insertProcess(Process process) {
-        cpuQueue.insert(process);
-        process.enterCPUQueue(clock);
+    	if (process != null) {
+    		cpuQueue.insert(process);
+    		process.enterCPUQueue(clock);
+    	}
+    	
+    	// TEST PRINT
+//    	else System.out.print("CPU insert process = null! \n");
+    	
     }
     
     public Process extractProcess() {
-    	Process process = activeProcess;
-    	activeProcess = null;
-    	process.leaveCPU(clock);
-    	return process;
+    	if (activeProcess != null) {	
+    		Process process = activeProcess;
+    		activeProcess = null;
+    		process.leaveCPU(clock);
+    		gui.setCpuActive(null);
+    		return process;
+    	}
+    	
+    	// TEST PRINT
+//    	System.out.print("There was no CPU process to extract! \n");
+    	
+    	return null;
     }
     
     public boolean isIdle() {
@@ -36,26 +50,56 @@ public class CPU {
     }
     
     public void run() {
-    	Process activeProcess = (Process) cpuQueue.removeNext();
-    	activeProcess.enterCPU(clock);
-    	gui.setCpuActive(activeProcess);
-    	long nextIo = activeProcess.calcTimeToNextIoOperation();
-    	if (activeProcess.getCpuTimeNeeded() > maxCPUTime && nextIo > maxCPUTime) {
-    		eventQueue.insertEvent(new Event(Constants.SWITCH_PROCESS, clock + maxCPUTime));
+    	if (!cpuQueue.isEmpty()) {
+    		if (isIdle()) {
+    			activeProcess = (Process) cpuQueue.removeNext();
+    			activeProcess.enterCPU(clock);
+    			gui.setCpuActive(activeProcess);
+    			long nextIo = activeProcess.calcTimeToNextIoOperation();
+    			if (activeProcess.getCpuTimeNeeded() > maxCPUTime && nextIo > maxCPUTime) {
+    				eventQueue.insertEvent(new Event(Constants.SWITCH_PROCESS, clock + maxCPUTime));
+    				statistics.cpuTimeProcessing += maxCPUTime;
+    				
+    				// TEST PRINT
+//    				System.out.print("CPU switching process \n");
+    			
+    			}
+    			else if (nextIo < maxCPUTime && nextIo < activeProcess.getCpuTimeNeeded()) {
+    				eventQueue.insertEvent(new Event(Constants.IO_REQUEST, clock + nextIo));
+    				statistics.cpuTimeProcessing += nextIo;
+    			
+    				// TEST PRINT
+//    				System.out.print("CPU requesting IO \n");
+    			
+    			}
+    			else if (activeProcess.getCpuTimeNeeded() <= maxCPUTime && activeProcess.getCpuTimeNeeded() <= nextIo) {
+    				eventQueue.insertEvent(new Event(Constants.END_PROCESS, clock + activeProcess.getCpuTimeNeeded()));
+    				statistics.cpuTimeProcessing += activeProcess.getCpuTimeNeeded();
+    			
+    				// TEST PRINT
+//    				System.out.print("CPU ending process \n");
+    			
+    			}
+    			
+        		// TEST PRINT
+        		else {
+        			System.out.print("PLEASE CHECK CPU FOR BUGS! \n");
+        			System.out.print("Time needed: " + activeProcess.getCpuTimeNeeded() + ", maxCPUTime: " + maxCPUTime + ", NextIO: " + nextIo);
+        		}
+    			
+    		}    		
     	}
-    	else if (nextIo < maxCPUTime && nextIo < activeProcess.getCpuTimeNeeded()) {
-    		eventQueue.insertEvent(new Event(Constants.IO_REQUEST, clock + nextIo));
-    	}
-    	else if (activeProcess.getCpuTimeNeeded() <= maxCPUTime && activeProcess.getCpuTimeNeeded() <= nextIo) {
-    		eventQueue.insertEvent(new Event(Constants.END_PROCESS, clock + activeProcess.getCpuTimeNeeded()));
-    	}
-    	else {System.out.print("PLEASE CHECK CPU FOR BUGS!");}
+    	
+    	// TEST PRINT
+//    	else System.out.print("The cpuQueue was empty! \n");
+    	
     }
     
     
 	public void updateClock(long clock) {
+		
 		//TEST PRINT
-		System.out.print("The CPU clock is now: " + clock + "\n");
+//		System.out.print("The CPU clock is now: " + clock + "\n");
 		
 		this.clock = clock;
 	}
@@ -73,35 +117,5 @@ public class CPU {
 
 	public void setMaxCPUTime(long maxCPUTime) {
 		this.maxCPUTime = maxCPUTime;
-	}
-
-
-    
-    
- 
-
-    
-//    public Process getActive() {
-//    	Process process = mProcess;
-//    	mProcess = null;
-//    	return process;
-//    }
-//
-//    public Process popProcess() {
-//        if (mQueue.isEmpty()) return mProcess;
-//        Process process = mProcess;
-//        mProcess = (Process) mQueue.removeNext();
-//        return process;
-//    }
-//
-//    public Process start() {
-//    	if (mQueue.isEmpty()) {
-//    		mProcess = null;
-//    		return mProcess;
-//    	} else {
-//    		mProcess = (Process) mQueue.removeNext();
-//    		return mProcess;
-//    	}
-//    }
-    
+	}    
 }

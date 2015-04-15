@@ -81,5 +81,9 @@ public class Memory {
     public void processCompleted(Process p) {
 		freeMemory += p.getMemoryNeeded();
     }
+    
+    public long getFreeMemory() {
+    	return freeMemory;
+    }
 }
 

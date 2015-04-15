@@ -72,7 +72,7 @@ public class Statistics
 		System.out.println("Average time spent waiting for cpu per process:               "+
 		totalTimeSpentWaitingForCpu/nofCompletedProcesses+" ms");
 		System.out.println("Average time spent processing per process:                    "+
-		totalTimeSpentProcessing/nofCompletedProcesses+" ms");
+		cpuTimeProcessing/nofCompletedProcesses+" ms");
 		System.out.println("Average time spent waiting for I/O per process:               "+
 		totalTimeSpentWaitingForIo/nofCompletedProcesses+" ms");
 		System.out.println("Average time spent in I/O per process:                        "+
