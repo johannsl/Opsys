@@ -21,8 +21,8 @@ public class Simulator implements Constants
 	private long avgArrivalInterval;
 	// Add member variables as needed
 
-	private CPU mCPU;
-	private IO mIO;
+	private CPU CPU;
+	private IO IO;
 
 	/**
 	 * Constructs a scheduling simulator with the given parameters.
@@ -46,8 +46,8 @@ public class Simulator implements Constants
 		memory = new Memory(memoryQueue, memorySize, statistics);
 		clock = 0;
 		// Add code as needed
-		mCPU = new CPU(cpuQueue, maxCpuTime);
-		mIO = new IO(ioQueue, avgIoTime);
+		CPU = new CPU(eventQueue, cpuQueue, gui, clock, statistics, maxCpuTime);
+		IO = new IO(ioQueue, clock, gui, statistics, avgIoTime);
     }
 
     /**
@@ -67,11 +67,20 @@ public class Simulator implements Constants
 			Event event = eventQueue.getNextEvent();
 			// Find out how much time that passed...
 			long timeDifference = event.getTime()-clock;
-			// ...and update the clock.
+			
+			// TEST PRINT
+			System.out.print("\n" + timeDifference + " has passed since last event \n");
+			
+			// ...and update the clock.	
 			clock = event.getTime();
+			CPU.updateClock(clock);
+			IO.updateClock(clock);
 			// Let the memory unit and the GUI know that time has passed
 			memory.timePassed(timeDifference);
 			gui.timePassed(timeDifference);
+			CPU.timePassed(timeDifference);
+			IO.timePassed(timeDifference);
+			
 			// Deal with the event
 			if (clock < simulationLength) {
 				processEvent(event);
@@ -146,12 +155,12 @@ public class Simulator implements Constants
 			// Also add new events to the event queue if needed
 			
 			//TEST PRINT
-			System.out.print("INSERTING: " + p.toString() + " to the CPU QUEUE \n");
+			System.out.print("Inserting " + p.toString() + " to the CPU queue \n");
 			
-			if (mCPU.insertProcess(p, clock)) {
-				gui.setCpuActive(p);
+			CPU.insertProcess(p);
+			if (CPU.isIdle()) {
+				CPU.run();
 			}
-
 			// Since we haven't implemented the CPU and I/O device yet,
 			// we let the process leave the system immediately, for now.
 			// memory.processCompleted(p);
@@ -159,7 +168,6 @@ public class Simulator implements Constants
 			flushMemoryQueue();
 			// Update statistics
 			p.updateStatistics(statistics);
-
 			// Check for more free memory
 			p = memory.checkMemory(clock);
 		}
@@ -169,51 +177,57 @@ public class Simulator implements Constants
 	 * Simulates a process switch.
 	 */
 	private void switchProcess() {
-		Process process = mCPU.getActive();
-		if (process != null) {
-			process.leaveCPU(clock);
-//			mCPU.insertProcess(process);
-			process.enterCPUQueue(clock);
+		Process p = CPU.extractProcess();
+		CPU.insertProcess(p);
+		if (CPU.isIdle()) {
+			CPU.run();
 		}
 		
-		process = mCPU.start();
-		if (process != null) {
-			process.enterCPU(clock);
-			if (process.calcTimeToNextIoOperation() > mCPU.getMaxCPUTime() && process.getCpuTimeNeeded() > mCPU.getMaxCPUTime()) {
-				eventQueue.insertEvent(new Event(SWITCH_PROCESS, clock + mCPU.getMaxCPUTime()));
-			} else if (process.calcTimeToNextIoOperation() > process.getCpuTimeNeeded()) {
-				eventQueue.insertEvent(new Event(END_PROCESS, clock + process.getCpuTimeNeeded()));
-			} else {
-				eventQueue.insertEvent(new Event(IO_REQUEST, clock + process.calcTimeToNextIoOperation()));
-			}
-		}
+//		Process process = mCPU.getActive();
+//		if (process != null) {
+//			process.leaveCPU(clock);
+//			mCPU.insertProcess(process);
+//			process.enterCPUQueue(clock);
+//		}
+//		
+//		process = mCPU.start();
+//		if (process != null) {
+//			process.enterCPU(clock);
+//			if (process.calcTimeToNextIoOperation() > mCPU.getMaxCPUTime() && process.getCpuTimeNeeded() > mCPU.getMaxCPUTime()) {
+//				eventQueue.insertEvent(new Event(SWITCH_PROCESS, clock + mCPU.getMaxCPUTime()));
+//			} else if (process.calcTimeToNextIoOperation() > process.getCpuTimeNeeded()) {
+//				eventQueue.insertEvent(new Event(END_PROCESS, clock + process.getCpuTimeNeeded()));
+//			} else {
+//				eventQueue.insertEvent(new Event(IO_REQUEST, clock + process.calcTimeToNextIoOperation()));
+//			}
+//		}
 	}
 
 	/**
 	 * Ends the active process, and deallocates any resources allocated to it.
 	 */
 	private void endProcess() {
-		Process process = mCPU.getActive();
-		process.leaveCPU(clock);
-		memory.processCompleted(process);
+//		Process process = mCPU.getActive();
+//		process.leaveCPU(clock);
+//		memory.processCompleted(process);
 	}
 
-	/**
+	/** 
 	 * Processes an event signifying that the active process needs to
 	 * perform an I/O operation.
 	 */
 	private void processIoRequest() {
-		// Incomplete
-		Process process = mCPU.getActive();
-		if (process != null) {
-			process.leaveCPU(clock);
-			process.enterIOQueue(clock);
-			if (mIO.insertProcess(process)) {
-				process.enterIO(clock);
-				eventQueue.insertEvent(new Event(END_IO, clock + mIO.getIOTime()));
-			}
-			switchProcess();
-		}
+//		// Incomplete
+//		Process process = mCPU.getActive();
+//		if (process != null) {
+//			process.leaveCPU(clock);
+//			process.enterIOQueue(clock);
+//			if (mIO.insertProcess(process)) {
+//				process.enterIO(clock);
+//				eventQueue.insertEvent(new Event(END_IO, clock + mIO.getIOTime()));
+//			}
+//			switchProcess();
+//		}
 	}
 
 	/**
@@ -221,16 +235,16 @@ public class Simulator implements Constants
 	 * is done with its I/O operation.
 	 */
 	private void endIoOperation() {
-		Process process = mIO.getProcess();
-		process.leaveIO(clock);
-//		mCPU.insertProcess(process);
-		process.enterCPUQueue(clock);
-		if (mCPU.isIdle()) switchProcess();
-		process = mIO.begin();
-		if (process != null) {
-			process.enterIO(clock);
-			eventQueue.insertEvent(new Event(END_IO, clock + mIO.getIOTime()));
-		}
+//		Process process = IO.getProcess();
+//		process.leaveIO(clock);
+//		CPU.insertProcess(process);
+//		process.enterCPUQueue(clock);
+//		if (CPU.isIdle()) switchProcess();
+//		process = IO.begin();
+//		if (process != null) {
+//			process.enterIO(clock);
+//			eventQueue.insertEvent(new Event(END_IO, clock + IO.getIOTime()));
+//		}
 	}
 
 	/**
@@ -285,6 +299,7 @@ public class Simulator implements Constants
 //		long avgArrivalInterval = readLong(reader);
 		long avgArrivalInterval = 5000L;
 
+		@SuppressWarnings("unused")
 		SimulationGui gui = new SimulationGui(memorySize, maxCpuTime, avgIoTime, simulationLength, avgArrivalInterval);
 	}
 }

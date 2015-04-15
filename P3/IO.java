@@ -5,14 +5,20 @@ import java.util.Random;
  */
 public class IO {
     private Queue mQueue;
-    private Process mProcess;
-    private Random mRandom;
+    private long clock;
+    private Gui gui;
+    private Statistics statistics;
     private long avgIOTime;
+    private Random mRandom;
+    private Process mProcess;
 
-    public IO(Queue queue, long avgIOTime) {
-    	mRandom = new Random();
-        this.mQueue = queue;
+    public IO(Queue queue, long clock, Gui gui, Statistics statistics, long avgIOTime) {
+    	this.mQueue = queue;
+        this.clock = clock;
+        this.gui = gui;
+        this.statistics = statistics;
         this.avgIOTime = avgIOTime;
+        mRandom = new Random();
     }
 
     public boolean insertProcess(Process process) {
@@ -24,6 +30,23 @@ public class IO {
         return false;
     }
 
+	public void timePassed(long timePassed) {
+		statistics.ioQueueLengthTime += mQueue.getQueueLength()*timePassed;
+		if (mQueue.getQueueLength() > statistics.ioQueueLargestLength) {
+			statistics.ioQueueLargestLength = mQueue.getQueueLength();
+		}
+	}
+    
+	public void updateClock(long clock) {
+		//TEST PRINT
+		System.out.print("The IO clock is now: " + clock + "\n");
+		
+		this.clock = clock;
+	}
+    
+	
+	
+	
     public long getIOTime() {
     	return (long) (Math.pow(mRandom.nextDouble(), 2) * 2 * avgIOTime);
     }

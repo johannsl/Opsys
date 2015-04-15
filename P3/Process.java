@@ -48,7 +48,7 @@ public class Process implements Constants
 	/** The global time of the last event involving this process */
 	private long timeOfLastEvent;
 	
-	private Random mRandom;
+	private Random randomVar;
 	private long endTime;
 
 	/**
@@ -58,7 +58,7 @@ public class Process implements Constants
 	 * @param creationTime	The global time when this process is created.
 	 */
 	public Process(long memorySize, long creationTime) {
-		mRandom = new Random();
+		randomVar = new Random();
 		// Memory need varies from 100 kB to 25% of memory size
 		memoryNeeded = 100 + (long)(Math.random()*(memorySize/4-100));
 		// CPU time needed varies from 100 to 10000 milliseconds
@@ -144,6 +144,9 @@ public class Process implements Constants
 	}
 	
 	public synchronized void leaveCPU(long clock) {
+		//TEST PRINT
+		System.out.print(this.toString() + " leaves CPU at " + clock + "\n");
+		
 		timeSpentInCpu += clock - timeOfLastEvent;
 		cpuTimeNeeded -= clock - timeOfLastEvent;
 		timeToNextIoOperation -= clock - timeOfLastEvent;
@@ -173,7 +176,7 @@ public class Process implements Constants
 	
 	public long calcTimeToNextIoOperation() {
 		long result = timeToNextIoOperation;
-		if (timeToNextIoOperation == 0) result = (long) (mRandom.nextDouble() * avgIoInterval * avgIoInterval * 2.);
+		if (timeToNextIoOperation == 0) result = (long) (randomVar.nextDouble() * avgIoInterval * avgIoInterval * 2.);
 		return result;
 	}
 	
