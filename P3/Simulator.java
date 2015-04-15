@@ -121,11 +121,11 @@ public class Simulator implements Constants
 	private void createProcess() {
 		// Create a new process
 		Process newProcess = new Process(memory.getMemorySize(), clock);
-		memory.insertProcess(newProcess);
 		
 		//TEST PRINT
 		System.out.print(newProcess.toString() + ": CPU TIME: " + newProcess.getCpuTimeNeeded() + ", MEMORY NEED: " + newProcess.getMemoryNeeded() + "\n");
 		
+		memory.insertProcess(newProcess);
 		flushMemoryQueue();
 		// Add an event for the next process arrival
 		long nextArrivalTime = clock + 1 + (long)(2*Math.random()*avgArrivalInterval);
@@ -151,11 +151,10 @@ public class Simulator implements Constants
 			if (mCPU.insertProcess(p, clock)) {
 				gui.setCpuActive(p);
 			}
-			
-//			eventQueue.insertEvent(new Event(SWITCH_PROCESS, clock));
+
 			// Since we haven't implemented the CPU and I/O device yet,
 			// we let the process leave the system immediately, for now.
-//			memory.processCompleted(p);
+			// memory.processCompleted(p);
 			// Try to use the freed memory:
 			flushMemoryQueue();
 			// Update statistics

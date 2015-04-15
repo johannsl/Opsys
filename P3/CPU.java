@@ -42,7 +42,6 @@ public class CPU {
     	return process;
     }
 
-
     public Process popProcess() {
         if (mQueue.isEmpty()) return mProcess;
         Process process = mProcess;

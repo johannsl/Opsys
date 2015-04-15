@@ -127,7 +127,7 @@ public class Process implements Constants
 
 	public synchronized void enterCPUQueue(long clock) {
 		//TEST PRINT
-		System.out.print("Process enters CPU queue at " + clock + "\n");
+		System.out.print(this.toString() + " enters CPU queue at " + clock + "\n");
 	
 		nofTimesInReadyQueue++;
 		timeOfLastEvent = clock;
@@ -136,7 +136,7 @@ public class Process implements Constants
 	
 	public synchronized void enterCPU(long clock) {
 		//TEST PRINT
-		System.out.print("Process enters CPU at " + clock + "\n");
+		System.out.print(this.toString() + " enters CPU at " + clock + "\n");
 	
 		timeSpentInReadyQueue += clock - timeOfLastEvent;
 		timeOfLastEvent = clock;
@@ -170,7 +170,6 @@ public class Process implements Constants
 		timeOfLastEvent = clock;
 		notifyAll();
 	}
-
 	
 	public long calcTimeToNextIoOperation() {
 		long result = timeToNextIoOperation;
