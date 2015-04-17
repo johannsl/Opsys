@@ -1,5 +1,4 @@
-public interface Constants 
-{
+public interface Constants {
 	/** Event type describing the arrival of a new process */
     public static final int NEW_PROCESS = 1;
 	/** Event type describing the completion of the active process */

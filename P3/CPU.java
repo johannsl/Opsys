@@ -48,7 +48,20 @@ public class CPU {
     public boolean isIdle() {
     	return (activeProcess == null);
     }
-    
+
+    /*	This is the part where the 'Round Robin algorithm' is implemented.
+     * 
+     * 	Basically, when the CPU.run() method is called the CPU 'runs', which means it will reduce the work needed
+     * 	to complete the current process (activeProcess). The Round Robin implementation here limits the CPU to work
+     *	on any process for longer than the work limit (standard 500ms); If the process needs more work, the process
+     * 	will be moved back in the line (cpuQueue) so that other processes can be worked on.
+     * 
+     * 	The two other situations the CPU might face are: the active process has an I/O request, in which case the
+     * 	process will be moved to the I/O queue, or the active process does not need more processing, in which case
+     * 	the process is terminated.
+     *  
+     * 	- johannsl & iverasp
+     */
     public void run() {
     	if (!cpuQueue.isEmpty()) {
     		if (isIdle()) {
@@ -58,15 +71,13 @@ public class CPU {
     			long nextIo = activeProcess.calcTimeToNextIoOperation();
     			if (activeProcess.getCpuTimeNeeded() > maxCPUTime && nextIo > maxCPUTime) {
     				eventQueue.insertEvent(new Event(Constants.SWITCH_PROCESS, clock + maxCPUTime));
-    				statistics.cpuTimeProcessing += maxCPUTime;
     				
     				// TEST PRINT
 //    				System.out.print("CPU switching process \n");
     			
     			}
-    			else if (nextIo < maxCPUTime && nextIo < activeProcess.getCpuTimeNeeded()) {
+    			else if (nextIo <= maxCPUTime && nextIo < activeProcess.getCpuTimeNeeded()) {
     				eventQueue.insertEvent(new Event(Constants.IO_REQUEST, clock + nextIo));
-    				statistics.cpuTimeProcessing += nextIo;
     			
     				// TEST PRINT
 //    				System.out.print("CPU requesting IO \n");
@@ -74,7 +85,6 @@ public class CPU {
     			}
     			else if (activeProcess.getCpuTimeNeeded() <= maxCPUTime && activeProcess.getCpuTimeNeeded() <= nextIo) {
     				eventQueue.insertEvent(new Event(Constants.END_PROCESS, clock + activeProcess.getCpuTimeNeeded()));
-    				statistics.cpuTimeProcessing += activeProcess.getCpuTimeNeeded();
     			
     				// TEST PRINT
 //    				System.out.print("CPU ending process \n");
@@ -84,9 +94,8 @@ public class CPU {
         		// TEST PRINT
         		else {
         			System.out.print("PLEASE CHECK CPU FOR BUGS! \n");
-        			System.out.print("Time needed: " + activeProcess.getCpuTimeNeeded() + ", maxCPUTime: " + maxCPUTime + ", NextIO: " + nextIo);
-        		}
-    			
+        			System.out.print("Time needed: " + activeProcess.getCpuTimeNeeded() + ", maxCPUTime: " + maxCPUTime + ", NextIO: " + nextIo + "\n");
+        		}	
     		}    		
     	}
     	
@@ -94,7 +103,6 @@ public class CPU {
 //    	else System.out.print("The cpuQueue was empty! \n");
     	
     }
-    
     
 	public void updateClock(long clock) {
 		

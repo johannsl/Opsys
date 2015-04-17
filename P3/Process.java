@@ -10,8 +10,8 @@ import sun.font.LayoutPathImpl.EndType;
  *
  * You will probably want to add more methods to this class.
  */
-public class Process implements Constants
-{
+@SuppressWarnings("unused")
+public class Process implements Constants {
 	/** The ID of the next process to be created */
 	private static long nextProcessId = 1;
 	/** The font used by all processes */
@@ -116,6 +116,13 @@ public class Process implements Constants
      */
 	public void updateStatistics(Statistics statistics) {
 		statistics.totalTimeSpentWaitingForMemory += timeSpentWaitingForMemory;
+		statistics.totalTimeSpentWaitingForCpu += timeSpentInReadyQueue;
+		statistics.cpuTimeProcessing += timeSpentInCpu;
+		statistics.totalTimeSpentWaitingForIo += timeSpentWaitingForIo;
+		statistics.totalTimeSpentInIo += timeSpentInIo;
+		statistics.totalTimeSpentInSystem += timeSpentWaitingForMemory+timeSpentInReadyQueue+timeSpentInCpu+timeSpentWaitingForIo+timeSpentInIo;
+		statistics.cpuQueueTotalTimes += nofTimesInReadyQueue;
+		statistics.ioQueueTotalTimes += nofTimesInIoQueue;
 		statistics.nofCompletedProcesses++;
 	}
 	
@@ -276,5 +283,4 @@ public class Process implements Constants
 	public void setMemoryNeeded(long memoryNeeded) {
 		this.memoryNeeded = memoryNeeded;
 	}
-	
 }

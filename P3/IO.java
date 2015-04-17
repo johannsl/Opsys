@@ -1,4 +1,3 @@
-import java.util.Random;
 
 /**
  * Created by iver on 08.04.15.
@@ -22,8 +21,7 @@ public class IO {
     }
 
     public void insertProcess(Process process) {
-        if (process != null)
-        {
+        if (process != null) {
         	ioQueue.insert(process);
         	process.enterIOQueue(clock);
         }
@@ -68,6 +66,7 @@ public class IO {
     }
     
 	public void updateClock(long clock) {
+		
 		//TEST PRINT
 //		System.out.print("The IO clock is now: " + clock + "\n");
 		

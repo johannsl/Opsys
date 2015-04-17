@@ -1,8 +1,7 @@
 /**
  * The GUI methods that are publicly available to other parts of the program.
  */
-public interface Gui 
-{
+public interface Gui {
 	/**
 	 * Controls which process is being shown as the process active in the CPU.
 	 * @param p		The process that is currently active, or null if the CPU is idle.

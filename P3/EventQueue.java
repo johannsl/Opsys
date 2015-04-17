@@ -7,8 +7,7 @@ import java.util.*;
  * an example of a priority queue (event time being the
  * priority in this case).
  */
-public class EventQueue
-{
+public class EventQueue {
 	/** The list of events */
 	private ArrayList<Event> events;
 
