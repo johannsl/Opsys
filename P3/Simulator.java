@@ -249,6 +249,10 @@ public class Simulator implements Constants {
 		System.out.print("Memory size (KB): ");
 		long memorySize = readLong(reader);
 //		long memorySize = 2048L;
+		if(memorySize == 0) {
+			memorySize = 2048L;
+			System.out.println("Memory size set to 2048KB.");
+		}
 		while(memorySize < 400) {
 			System.out.println("Memory size must be at least 400 KB. Specify memory size (KB): ");
 			memorySize = readLong(reader);
@@ -256,15 +260,27 @@ public class Simulator implements Constants {
 
 		System.out.print("Maximum uninterrupted cpu time for a process (ms): ");
 		long maxCpuTime = readLong(reader);
+		if(maxCpuTime == 0) {
+			maxCpuTime = 500L;
+			System.out.println("Maximum uninterrupted cpu time set to set to 500ms.");
+		}
 //		long maxCpuTime = 500L;
 
 		System.out.print("Average I/O operation time (ms): ");
 		long avgIoTime = readLong(reader);
+		if(avgIoTime == 0) {
+			avgIoTime = 225L;
+			System.out.println("Average I/O operation time set to 225ms.");
+		}
 //		long avgIoTime = 225L;
 
 		System.out.print("Simulation length (ms): ");
 		long simulationLength = readLong(reader);
 //		long simulationLength = 250000L;
+		if(simulationLength == 0) {
+			simulationLength = 250000L;
+			System.out.println("Simulation length is set to 250000ms.");
+		}
 		while(simulationLength < 1) {
 			System.out.println("Simulation length must be at least 1 ms. Specify simulation length (ms): ");
 			simulationLength = readLong(reader);
@@ -272,6 +288,10 @@ public class Simulator implements Constants {
 
 		System.out.print("Average time between process arrivals (ms): ");
 		long avgArrivalInterval = readLong(reader);
+		if(avgArrivalInterval == 0) {
+			avgArrivalInterval = 5000L;
+			System.out.println("Average time between process arrivals is set to 5000ms.");
+		}
 //		long avgArrivalInterval = 5000L;
 
 		@SuppressWarnings("unused")
